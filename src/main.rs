@@ -9,7 +9,7 @@ fn main() {
     let mut board = new_board();
     let mut score = 0;
     let mut player_position = (0, 0);
-    place_cell_on_board(&mut board, Cell::Player, player_position);
+    place_piece_on_board(&mut board, Piece::Player, player_position);
 
     loop { 
 
@@ -33,8 +33,8 @@ fn main() {
 
         let next_position = calculate_new_position(player_position);
         if next_position != player_position {
-            match move_player_on_board(&mut board, player_position, next_position) {
-                Cell::Rubbish(n) => score += n,
+            match move_piece_on_board(&mut board, player_position, next_position) {
+                Piece::Rubbish(n) => score += n,
                 _ => {},
             };
             player_position = next_position;
@@ -90,18 +90,18 @@ fn input_help() {
 }
 
 #[derive(Clone, Copy)]
-enum Cell {
+enum Piece {
     Player,
     Empty,
     Rubbish(u32)
 }
 
-impl fmt::Display for Cell {
+impl fmt::Display for Piece {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Cell::Player => write!(f, "{}", "x"),
-            Cell::Empty => write!(f, "{}", "0"),
-            Cell::Rubbish(n) => write!(f, "{}", n),
+            Piece::Player => write!(f, "{}", "x"),
+            Piece::Empty => write!(f, "{}", "0"),
+            Piece::Rubbish(n) => write!(f, "{}", n),
         }
     }
 }
@@ -124,17 +124,17 @@ fn inbetween_range(value: i8, low: i8, high: i8) -> i8{
     }
 }
 
-fn new_board() -> [[Cell; BOARD_X]; BOARD_Y] {
+fn new_board() -> [[Piece; BOARD_X]; BOARD_Y] {
     return [
-        [Cell::Empty, Cell::Empty, Cell::Empty, Cell::Empty, Cell::Empty],
-        [Cell::Empty, Cell::Empty, Cell::Empty, Cell::Empty, Cell::Rubbish(1)],
-        [Cell::Rubbish(2), Cell::Empty, Cell::Empty, Cell::Empty, Cell::Empty],
-        [Cell::Empty, Cell::Empty, Cell::Rubbish(3), Cell::Empty, Cell::Empty],
-        [Cell::Empty, Cell::Empty, Cell::Empty, Cell::Empty, Cell::Empty],
+        [Piece::Empty, Piece::Empty, Piece::Empty, Piece::Empty, Piece::Empty],
+        [Piece::Empty, Piece::Empty, Piece::Empty, Piece::Empty, Piece::Rubbish(1)],
+        [Piece::Rubbish(2), Piece::Empty, Piece::Empty, Piece::Empty, Piece::Empty],
+        [Piece::Empty, Piece::Empty, Piece::Rubbish(3), Piece::Empty, Piece::Empty],
+        [Piece::Empty, Piece::Empty, Piece::Empty, Piece::Empty, Piece::Empty],
     ]
 }
 
-fn place_cell_on_board(board: &mut [[Cell; BOARD_X]; BOARD_Y], piece: Cell, position: (usize, usize)) -> Cell {
+fn place_piece_on_board(board: &mut [[Piece; BOARD_X]; BOARD_Y], piece: Piece, position: (usize, usize)) -> Piece {
     let (x, y) = position;
     let x = x % BOARD_X;
     let y = y % BOARD_Y;
@@ -143,13 +143,12 @@ fn place_cell_on_board(board: &mut [[Cell; BOARD_X]; BOARD_Y], piece: Cell, posi
     last
 }
 
-fn move_player_on_board(board: &mut [[Cell; 5]; 5], from: (usize, usize), to: (usize, usize)) -> Cell {
-    let last = place_cell_on_board(board, Cell::Player, to);
-    place_cell_on_board(board, Cell::Empty, from);
-    last
+fn move_piece_on_board(board: &mut [[Piece; 5]; 5], from: (usize, usize), to: (usize, usize)) -> Piece {
+    let piece = place_piece_on_board(board, Piece::Empty, from);
+    place_piece_on_board(board, piece, to)
 }
 
-fn display_board(board: &[[Cell; 5]]) {
+fn display_board(board: &[[Piece; 5]]) {
     for (i, row) in board.iter().enumerate() {
         for col in row.iter() {
             print!("{} ", col);
